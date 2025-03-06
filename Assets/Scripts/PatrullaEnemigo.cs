@@ -5,6 +5,12 @@ public class PatrullaEnemigo : MonoBehaviour
     public Transform[] puntosPatrulla; // Array de puntos de patrulla
     public float velocidad = 3f;       // Velocidad de movimiento
     private int puntoActual = 0;       // Índice del punto actual
+    private Animator animator;         // Referencia al Animator
+
+    void Start()
+    {
+        animator = GetComponent<Animator>(); // Obtén el componente Animator
+    }
 
     void Update()
     {
@@ -18,5 +24,8 @@ public class PatrullaEnemigo : MonoBehaviour
         {
             puntoActual = (puntoActual + 1) % puntosPatrulla.Length; // Avanza al siguiente punto
         }
+
+        // Controla la animación de caminar
+        animator.SetBool("Walk", true); // Cambia "Caminando" por el nombre de tu parámetro de animación
     }
 }
