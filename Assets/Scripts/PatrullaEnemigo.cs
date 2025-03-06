@@ -20,12 +20,9 @@ public class PatrullaEnemigo : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, puntosPatrulla[puntoActual].position, velocidad * Time.deltaTime);
 
         // Si el enemigo llega al punto actual, cambia al siguiente punto
-        if (Vector3.Distance(transform.position, puntosPatrulla[puntoActual].position) < 0.1f)
+        if (Vector3.Distance(transform.position, puntosPatrulla[puntoActual].position) < 1)
         {
             puntoActual = (puntoActual + 1) % puntosPatrulla.Length; // Avanza al siguiente punto
         }
-
-        // Controla la animación de caminar
-        animator.SetBool("Walk", true); // Cambia "Caminando" por el nombre de tu parámetro de animación
     }
 }
