@@ -6,6 +6,9 @@ public class Crystal : MonoBehaviour
     public AudioClip sonidoCristal; // Sonido al recoger el cristal
     public bool esFinal = false; // Si este cristal termina el nivel
 
+    public Transform player;
+    public int curacion=20;
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player")) // Verifica si el jugador tocó el cristal
@@ -24,6 +27,8 @@ public class Crystal : MonoBehaviour
             else
             {
                 // Si es el primer cristal, solo se destruye
+                PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
+                playerHealth.TakeDamage(curacion);
                 Destroy(gameObject);
             }
         }
