@@ -1,62 +1,41 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class LoseScreenManager : MonoBehaviour
 {
-    public GameObject loseScreen;
-    public Button restartButton; // Asigna el botón en el Inspector
-    private CanvasGroup canvasGroup;
+    public GameObject loseScreenCanvas; // Referencia al Canvas de la pantalla de derrota
+    public Text loseText; // Referencia al texto de "You Died"
+    public Button restartButton; // Referencia al botón de reiniciar
 
     void Start()
     {
-        if (loseScreen != null)
-        {
-            loseScreen.SetActive(false); // Ocultar al inicio
-            canvasGroup = loseScreen.GetComponent<CanvasGroup>();
+        // Ocultar la pantalla de derrota al inicio
+        loseScreenCanvas.SetActive(false);
 
-            if (canvasGroup != null)
-                canvasGroup.alpha = 0f; // Hacerlo invisible
-        }
-
-        if (restartButton != null)
-        {
-            restartButton.GetComponentInChildren<Text>().text = "Retry"; // Cambia el texto
-            restartButton.onClick.RemoveAllListeners();
-            restartButton.onClick.AddListener(RestartGame); // Agregar función al botón
-        }
+        // Asignar la función ReiniciarNivel al botón
+        restartButton.onClick.AddListener(ReiniciarNivel);
     }
 
+    // Método para mostrar la pantalla de derrota
     public void ShowLoseScreen()
     {
-        if (loseScreen != null)
-        {
-            loseScreen.SetActive(true);
-            if (canvasGroup != null)
-            {
-                StartCoroutine(FadeIn());
-            }
+        loseScreenCanvas.SetActive(true);
+        Time.timeScale = 0f; // Pausar el juego
 
-            Cursor.lockState = CursorLockMode.None; // Mostrar el cursor
-            Cursor.visible = true;
-        }
+        // Habilitar y desbloquear el cursor
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 
-    void RestartGame()
+    // Método para reiniciar el nivel
+    public void ReiniciarNivel()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Recarga el nivel
-    }
+        Time.timeScale = 1f; // Reanudar el juego
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Reiniciar la escena actual
 
-    private System.Collections.IEnumerator FadeIn()
-    {
-        float duration = 1f;
-        float time = 0;
-        while (time < duration)
-        {
-            time += Time.deltaTime;
-            canvasGroup.alpha = time / duration; // Transición de opacidad
-            yield return null;
-        }
-        canvasGroup.alpha = 1f;
+        // Después de reiniciar, asegurarse de que el cursor esté oculto y bloqueado (si es necesario)
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 }

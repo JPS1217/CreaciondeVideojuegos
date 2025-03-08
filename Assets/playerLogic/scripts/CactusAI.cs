@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 
 public class CactusAI : MonoBehaviour
 {
@@ -14,10 +15,31 @@ public class CactusAI : MonoBehaviour
 
     public int health = 30; // Vida del enemigo
 
+    // Variables para el feedback visual al recibir daño
+    public Color damageColor = Color.red; // Color cuando recibe daño
+    public float damageFlashDuration = 0.2f; // Duración del efecto de parpadeo
+
+    private SkinnedMeshRenderer[] cactusRenderers; // Todos los SkinnedMeshRenderer del cactus
+    private Color[][] originalColors; // Guardar los colores originales de todos los materiales
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
+
+        // Obtener todos los SkinnedMeshRenderer del cactus y sus hijos
+        cactusRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
+
+        // Guardar los colores originales de todos los materiales
+        originalColors = new Color[cactusRenderers.Length][];
+        for (int i = 0; i < cactusRenderers.Length; i++)
+        {
+            originalColors[i] = new Color[cactusRenderers[i].materials.Length];
+            for (int j = 0; j < cactusRenderers[i].materials.Length; j++)
+            {
+                originalColors[i][j] = cactusRenderers[i].materials[j].color;
+            }
+        }
     }
 
     void Update()
@@ -59,13 +81,22 @@ public class CactusAI : MonoBehaviour
 
             transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
 
-            PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
-            if (playerHealth != null)
-            {
-                playerHealth.TakeDamage(10);
-            }
+            // Iniciar la corrutina para aplicar el daño en el 50% de la animación
+            StartCoroutine(DelayedDamage(attackCooldown * 0.2f));
 
             Invoke(nameof(ResetAttack), attackCooldown);
+        }
+    }
+
+    // Corrutina para aplicar el daño en el 50% de la animación
+    private IEnumerator DelayedDamage(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
+        if (playerHealth != null)
+        {
+            playerHealth.TakeDamage(10);
         }
     }
 
@@ -97,9 +128,37 @@ public class CactusAI : MonoBehaviour
     {
         health -= damage;
         Debug.Log($"Enemigo recibió {damage} de daño. Vida restante: {health}");
+
+        // Feedback visual: Cambiar el color del cactus a rojo
+        StartCoroutine(FlashDamage());
+
         if (health <= 0)
         {
             Die();
+        }
+    }
+
+    // Corrutina para el efecto de parpadeo al recibir daño
+    private IEnumerator FlashDamage()
+    {
+        // Cambiar el color de todos los materiales a rojo
+        foreach (var renderer in cactusRenderers)
+        {
+            foreach (var material in renderer.materials)
+            {
+                material.color = damageColor;
+            }
+        }
+
+        yield return new WaitForSeconds(damageFlashDuration); // Esperar
+
+        // Restaurar los colores originales de todos los materiales
+        for (int i = 0; i < cactusRenderers.Length; i++)
+        {
+            for (int j = 0; j < cactusRenderers[i].materials.Length; j++)
+            {
+                cactusRenderers[i].materials[j].color = originalColors[i][j];
+            }
         }
     }
 
